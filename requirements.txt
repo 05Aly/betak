@@ -1,0 +1,18 @@
+# 🏢 Django Core
+Django>=5.0,<6.0
+
+# 🗄️ Database Connection (Supabase PostgreSQL)
+psycopg2-binary>=2.9.9
+
+# ☁️ Cloud Storage (Supabase Storage Buckets)
+django-storages>=1.14.2
+boto3>=1.34.0
+
+# 🛡️ Security & Environment Variables
+python-dotenv>=1.0.1
+
+# 🖼️ Image Processing (Required for ImageField)
+pillow>=10.2.0
+
+# 🚀 Production Server (For Deployment)
+gunicorn>=21.2.0
