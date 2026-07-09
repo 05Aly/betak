@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+
+{% block title %}تسجيل الدخول - الهضبة العقارية{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto my-12 bg-white dark:bg-brand-nightSurface p-8 rounded-3xl shadow-sm border border-brand-dayBorder dark:border-brand-nightBorder">
+    <div class="text-center mb-6">
+        <h2 class="text-2xl font-black text-brand-orange">تسجيل الدخول</h2>
+        <p class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary text-sm mt-1">مرحباً بك مجدداً في منصة الهضبة العقارية</p>
+    </div>
+
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label for="id_username" class="block text-sm font-semibold text-brand-dayText dark:text-brand-nightText">اسم المستخدم</label>
+            <input type="text" name="username" id="id_username" required
+                   class="w-full px-4 py-2 mt-1 border border-brand-dayBorder dark:border-brand-nightBorder rounded-xl bg-brand-dayBg dark:bg-brand-nightBg text-brand-dayText dark:text-brand-nightText focus:ring-brand-teal focus:border-brand-teal focus:outline-none">
+        </div>
+        <div>
+            <label for="id_password" class="block text-sm font-semibold text-brand-dayText dark:text-brand-nightText">كلمة المرور</label>
+            <input type="password" name="password" id="id_password" required
+                   class="w-full px-4 py-2 mt-1 border border-brand-dayBorder dark:border-brand-nightBorder rounded-xl bg-brand-dayBg dark:bg-brand-nightBg text-brand-dayText dark:text-brand-nightText focus:ring-brand-teal focus:border-brand-teal focus:outline-none">
+        </div>
+
+        <button type="submit" 
+                class="w-full bg-brand-teal hover:bg-brand-tealHover text-white font-bold py-2.5 rounded-xl transition-colors shadow-sm mt-6">
+            دخول
+        </button>
+    </form>
+
+    <div class="text-center mt-6 pt-4 border-t border-brand-dayBorder dark:border-brand-nightBorder text-sm">
+        <span class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary">ليس لديك حساب؟</span>
+        <a href="{% url 'register' %}" class="text-brand-orange hover:underline font-bold">إنشاء حساب جديد</a>
+    </div>
+</div>
+{% block content_extra %}{% endblock %}
+{% endblock %}

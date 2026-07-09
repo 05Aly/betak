@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}الهضبة العقارية{% endblock %}</title>
+    
+    <!-- inline script to prevent dark mode flash of light background -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#E76F51',      /* Burnt Orange Primary */
+                            orangeHover: '#d45e41',
+                            teal: '#2A9D8F',        /* Accent Teal */
+                            tealHover: '#207F74',
+                            // Day (Light) Mode Palette
+                            dayBg: '#FFF7F2',
+                            daySurface: '#FFFFFF',
+                            dayText: '#241B17',
+                            dayTextSecondary: '#7C6A5E',
+                            dayBorder: '#EEDCD2',
+                            // Night (Dark) Mode Palette
+                            nightBg: '#17120F',
+                            nightSurface: '#241B17',
+                            nightText: '#FFF7F2',
+                            nightTextSecondary: '#A8968A',
+                            nightBorder: '#382D27'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Cairo Google Font for premium Arabic typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-brand-dayBg dark:bg-brand-nightBg text-brand-dayText dark:text-brand-nightText flex flex-col min-h-screen transition-colors duration-200">
+
+    <!-- Header Navigation -->
+    <header class="bg-white dark:bg-brand-nightSurface border-b border-brand-dayBorder dark:border-brand-nightBorder shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <a href="{% url 'home' %}" class="flex items-center space-x-2 space-x-reverse">
+                <span class="text-2xl font-black tracking-wider text-brand-orange">🏢 الهضبة العقارية</span>
+            </a>
+            
+            <nav class="hidden md:flex items-center space-x-6 space-x-reverse">
+                <a href="{% url 'home' %}" class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary hover:text-brand-orange dark:hover:text-brand-orange transition-colors font-bold">الرئيسية</a>
+                {% if user.is_authenticated %}
+                    {% if user.account_type == 'seller' or user.is_superuser %}
+                        <a href="{% url 'add_property' %}" class="bg-brand-teal hover:bg-brand-tealHover text-white px-4 py-2 rounded-xl font-bold transition-all duration-200 shadow-sm text-sm">
+                            ➕ أضف عقارك
+                        </a>
+                    {% endif %}
+                    {% if user.is_superuser or user.is_staff %}
+                        <a href="{% url 'admin_approvals' %}" class="bg-brand-orange hover:bg-brand-orangeHover text-white px-4 py-2 rounded-xl font-bold transition-all duration-200 shadow-sm text-sm">
+                            ⚙️ لوحة الموافقات
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </nav>
+
+            <div class="flex items-center space-x-4 space-x-reverse">
+                <!-- Theme Switcher Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-xl bg-brand-dayBg dark:bg-brand-nightBg border border-brand-dayBorder dark:border-brand-nightBorder text-gray-500 dark:text-gray-400 hover:text-brand-orange transition-all duration-200">
+                    <!-- Sun Icon (visible in dark mode) -->
+                    <svg id="theme-toggle-sun" class="w-5 h-5 hidden dark:block text-brand-orange" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.46 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
+                    </svg>
+                    <!-- Moon Icon (visible in light mode) -->
+                    <svg id="theme-toggle-moon" class="w-5 h-5 block dark:hidden text-brand-orange" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                </button>
+
+                {% if user.is_authenticated %}
+                    <div class="flex items-center space-x-3 space-x-reverse border-r border-brand-dayBorder dark:border-brand-nightBorder pr-4">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="Profile" class="w-9 h-9 rounded-full object-cover border-2 border-brand-teal">
+                        {% endif %}
+                        <div class="text-right hidden sm:block">
+                            <p class="text-[10px] text-brand-dayTextSecondary dark:text-brand-nightTextSecondary">{{ user.get_account_type_display }}</p>
+                            <p class="text-xs font-bold">{{ user.full_name }}</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'logout' %}" class="text-xs text-red-500 hover:text-red-400 font-bold border border-red-200 dark:border-red-950 px-3 py-1.5 rounded-xl bg-red-50 dark:bg-red-950/20">خروج</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="text-sm font-bold text-brand-dayTextSecondary dark:text-brand-nightTextSecondary hover:text-brand-orange">دخول</a>
+                    <a href="{% url 'register' %}" class="bg-brand-orange hover:bg-brand-orangeHover text-white text-xs px-4 py-2 rounded-xl font-bold transition-all shadow-sm">حساب جديد</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Messages Container -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+            {% for message in messages %}
+                <div class="p-4 mb-3 rounded-2xl flex items-center justify-between {% if message.tags == 'error' %}bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-900{% elif message.tags == 'success' %}bg-brand-daySurface dark:bg-brand-nightSurface text-brand-teal border border-brand-teal{% else %}bg-blue-50 dark:bg-blue-950/20 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-900{% endif %} shadow-sm text-sm">
+                    <span class="font-bold">{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Legal Disclaimer Footer -->
+    <footer class="bg-white dark:bg-brand-nightSurface border-t border-brand-dayBorder dark:border-brand-nightBorder py-8 mt-auto text-brand-dayTextSecondary dark:text-brand-nightTextSecondary">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+            <p class="text-sm font-bold text-brand-orange">منصة الهضبة العقارية بالمقطم - بدون سماسرة أو عمولات</p>
+            <div class="bg-brand-dayBg dark:bg-brand-nightBg p-4 rounded-2xl max-w-4xl mx-auto border border-brand-dayBorder dark:border-brand-nightBorder">
+                <p class="text-xs leading-relaxed">
+                    <strong class="text-brand-dayText dark:text-brand-nightText">إخلاء مسؤولية قانونية:</strong> 
+                    إن هذه المنصة هي مجرد أداة رقمية وتقنية تهدف إلى تسهيل عملية الربط والتواصل المباشر بين بائعي ومشتري العقارات في منطقة الهضبة بالمقطم. المنصة وأصحابها ومطوروها لا يمثلون أي طرف إنتاجي، ولا يتقاضون أي عمولات سماسرة، ولا يتحملون أي مسؤولية قانونية أو مالية تجاه أي عملية نصب، احتيال، تضليل، أو إخلال بالاتفاقات والتعاقدات التي تتم بين الأطراف خارج أو داخل التطبيق. يقع عبء التحقق القانوني من مستندات الملكية والمعاينة الفعلية على عاتق المستخدمين أنفسهم.
+                </p>
+            </div>
+            <p class="text-[10px]">&copy; 2026 منصة الهضبة العقارية. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+
+    <!-- Theme switch logic -->
+    <script>
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        themeToggleBtn.addEventListener('click', function() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    </script>
+</body>
+</html>

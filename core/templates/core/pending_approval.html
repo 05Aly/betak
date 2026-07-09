@@ -1,0 +1,56 @@
+{% extends 'core/base.html' %}
+
+{% block title %}الحساب قيد المراجعة - الهضبة العقارية{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto my-16 bg-white dark:bg-brand-nightSurface p-8 rounded-3xl shadow-sm border border-brand-dayBorder dark:border-brand-nightBorder text-center">
+    
+    {% if user.rejection_notes %}
+        <!-- Account Rejected Alert -->
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 dark:bg-red-950/20 text-red-500 mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-3">تم رفض تفعيل حسابك</h2>
+        
+        <p class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary leading-relaxed max-w-md mx-auto mb-6">
+            عذراً يا <strong class="text-brand-orange">{{ user.full_name }}</strong>. 
+            تم رفض طلب إنشاء وتوثيق حسابك من قبل الإدارة للسبب التالي:
+        </p>
+
+        <div class="bg-red-50 dark:bg-red-950/10 border border-red-200 dark:border-red-900/50 p-4 rounded-2xl text-red-800 dark:text-red-300 max-w-md mx-auto mb-8 font-bold text-sm">
+            « {{ user.rejection_notes }} »
+        </div>
+    {% else %}
+        <!-- Account Pending normal screen -->
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 dark:bg-amber-950/20 text-brand-orange mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8 animate-spin-slow">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-brand-orange mb-3">حسابك قيد المراجعة والتدقيق</h2>
+        
+        <p class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary leading-relaxed max-w-md mx-auto mb-6">
+            مرحباً بك يا <strong class="text-brand-orange">{{ user.full_name }}</strong>. 
+            بناءً على سياسة المنصة الصارمة لمنع السماسرة والحد من الحسابات الوهمية، يتم حالياً تدقيق ومراجعة حسابك وبياناتك من قبل إدارة الموقع.
+        </p>
+    {% endif %}
+
+    <div class="bg-brand-dayBg dark:bg-brand-nightBg border border-brand-dayBorder dark:border-brand-nightBorder p-4 rounded-2xl text-xs text-brand-dayTextSecondary dark:text-brand-nightTextSecondary max-w-sm mx-auto mb-8">
+        <p>نوع الحساب: <span class="font-bold text-brand-dayText dark:text-brand-nightText">{{ user.get_account_type_display }}</span></p>
+        <p class="mt-1">رقم الهاتف للتحقق: <span class="font-bold text-brand-dayText dark:text-brand-nightText">{{ user.phone_numbers }}</span></p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="{% url 'home' %}" class="w-full sm:w-auto px-6 py-2.5 bg-brand-dayBg dark:bg-brand-nightBg text-brand-dayText dark:text-brand-nightText hover:bg-brand-dayBorder dark:hover:bg-brand-nightBorder border border-brand-dayBorder dark:border-brand-nightBorder font-bold rounded-xl transition-colors">
+            تصفح كزائر
+        </a>
+        <a href="{% url 'logout' %}" class="w-full sm:w-auto px-6 py-2.5 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 font-bold rounded-xl transition-colors">
+            تسجيل الخروج
+        </a>
+    </div>
+</div>
+{% endblock %}

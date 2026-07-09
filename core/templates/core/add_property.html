@@ -1,0 +1,77 @@
+{% extends 'core/base.html' %}
+
+{% block title %}إضافة عقار جديد - الهضبة العقارية{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto my-8 bg-white dark:bg-brand-nightSurface p-8 rounded-3xl shadow-sm border border-brand-dayBorder dark:border-brand-nightBorder">
+    <div class="text-center mb-6">
+        <h2 class="text-2xl font-black text-brand-orange">إضافة عقار جديد بالهضبة</h2>
+        <p class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary text-sm mt-1">يرجى إدخال تفاصيل العقار بدقة، سيتم مراجعته وتنشيطه فوراً من قبل الإدارة</p>
+    </div>
+
+    {% if form.errors %}
+        <div class="bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-300 p-4 rounded-2xl border border-red-200 dark:border-red-900 mb-6 text-sm">
+            <p class="font-bold mb-1">يرجى تصحيح الأخطاء التالية:</p>
+            <ul class="list-inside list-disc">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field|title }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="space-y-5">
+        {% csrf_token %}
+        
+        <div>
+            <label for="id_title" class="block text-sm font-semibold text-brand-dayText dark:text-brand-nightText">عنوان الإعلان</label>
+            {{ form.title }}
+            <p class="text-[11px] text-brand-dayTextSecondary dark:text-brand-nightTextSecondary mt-1">مثال: شقة 150م للبيع بالهضبة الوسطى، المقطم</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label for="id_price" class="block text-sm font-semibold text-brand-dayText dark:text-brand-nightText">السعر المطلوبة (جنيه مصري)</label>
+                {{ form.price }}
+            </div>
+            <div>
+                <label for="id_address" class="block text-sm font-semibold text-brand-dayText dark:text-brand-nightText">العنوان بالتفصيل</label>
+                {{ form.address }}
+            </div>
+        </div>
+
+        <div>
+            <label for="id_description" class="block text-sm font-semibold text-brand-dayText dark:text-brand-nightText">الوصف التفصيلي (المساحة، التقسيم، التشطيب)</label>
+            {{ form.description }}
+        </div>
+
+        <div>
+            <label for="id_image" class="block text-sm font-semibold text-brand-dayText dark:text-brand-nightText">الصورة الرئيسية للعقار</label>
+            <div class="mt-1">
+                {{ form.image }}
+            </div>
+        </div>
+
+        <div>
+            <label for="id_video" class="block text-sm font-semibold text-brand-dayText dark:text-brand-nightText">فيديو للعقار (اختياري - أقصى حجم 10MB)</label>
+            <div class="mt-1">
+                {{ form.video }}
+            </div>
+            <p class="text-[11px] text-brand-dayTextSecondary dark:text-brand-nightTextSecondary mt-1">يساعد الفيديو في تسريع عملية البيع. يرجى ضغط الفيديو لتجنب تجاوز الحد المسموح.</p>
+        </div>
+
+        <div class="pt-4 border-t border-brand-dayBorder dark:border-brand-nightBorder flex gap-4">
+            <button type="submit" 
+                    class="flex-grow bg-brand-teal hover:bg-brand-tealHover text-white font-bold py-2.5 rounded-xl transition-colors shadow-sm text-center">
+                إرسال الإعلان للمراجعة
+            </button>
+            <a href="{% url 'home' %}" 
+               class="px-6 py-2.5 bg-brand-dayBg dark:bg-brand-nightBg text-brand-dayText dark:text-brand-nightText border border-brand-dayBorder dark:border-brand-nightBorder hover:bg-brand-dayBorder dark:hover:bg-brand-nightBorder font-bold rounded-xl transition-colors text-center text-sm flex items-center justify-center">
+                إلغاء
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends 'core/base.html' %}
+
+{% block title %}لوحة الموافقات والطلبات - الهضبة العقارية{% endblock %}
+
+{% block content %}
+<div class="space-y-10">
+
+    <!-- Page Header -->
+    <div class="border-b border-brand-dayBorder dark:border-brand-nightBorder pb-6">
+        <h1 class="text-3xl font-black text-brand-orange">⚙️ لوحة مراجعة طلبات التفعيل والنشر</h1>
+        <p class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary text-sm mt-2">
+            مساحة خاصة بمديري المنصة لمراجعة الحسابات الجديدة وتدقيق إعلانات العقارات المعلقة لمنع السماسرة والحد من الاحتيال.
+        </p>
+    </div>
+
+    <!-- Grid: Section 1 (Users) & Section 2 (Properties) -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        
+        <!-- RIGHT PANEL: Pending User Accounts (1 Column) -->
+        <div class="xl:col-span-1 space-y-6">
+            <div class="flex items-center justify-between border-b border-brand-dayBorder dark:border-brand-nightBorder pb-3">
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                    <span>👥 حسابات بانتظار الاعتماد</span>
+                    <span class="bg-brand-orange/10 text-brand-orange text-xs px-2.5 py-1 rounded-full font-bold">
+                        {{ pending_users|length }} طلبات
+                    </span>
+                </h2>
+            </div>
+            
+            {% if pending_users %}
+                <div class="space-y-4">
+                    {% for p_user in pending_users %}
+                        <div class="bg-white dark:bg-brand-nightSurface border border-brand-dayBorder dark:border-brand-nightBorder rounded-2xl p-5 shadow-sm space-y-4">
+                            <div class="flex items-center gap-3">
+                                {% if p_user.profile_picture %}
+                                    <img src="{{ p_user.profile_picture.url }}" alt="{{ p_user.full_name }}" class="w-14 h-14 rounded-full object-cover border-2 border-brand-orange">
+                                {% endif %}
+                                <div class="text-right">
+                                    <h3 class="font-bold text-base">{{ p_user.full_name }}</h3>
+                                    <p class="text-xs text-brand-dayTextSecondary dark:text-brand-nightTextSecondary">اسم المستخدم: @{{ p_user.username }}</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-brand-dayBg dark:bg-brand-nightBg p-3 rounded-xl text-xs space-y-1.5 border border-brand-dayBorder dark:border-brand-nightBorder text-brand-dayTextSecondary dark:text-brand-nightTextSecondary">
+                                <p><span class="font-bold text-brand-dayText dark:text-brand-nightText">البريد:</span> {{ p_user.email }}</p>
+                                <p><span class="font-bold text-brand-dayText dark:text-brand-nightText">الهواتف:</span> {{ p_user.phone_numbers }}</p>
+                                <p><span class="font-bold text-brand-dayText dark:text-brand-nightText">نوع الحساب:</span> {{ p_user.get_account_type_display }}</p>
+                            </div>
+
+                            {% if p_user.rejection_notes %}
+                                <div class="bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 text-xs p-3 rounded-xl border border-red-200 dark:border-red-900 leading-relaxed">
+                                    <strong>ملاحظات الرفض السابقة:</strong> {{ p_user.rejection_notes }}
+                                </div>
+                            {% endif %}
+
+                            <!-- Action Forms -->
+                            <div class="flex flex-col gap-2">
+                                <div class="flex gap-2">
+                                    <!-- Approve User Form -->
+                                    <form method="POST" action="{% url 'admin_approvals_action' %}" class="flex-grow">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action_type" value="approve">
+                                        <input type="hidden" name="target_type" value="user">
+                                        <input type="hidden" name="target_id" value="{{ p_user.id }}">
+                                        <button type="submit" class="w-full bg-brand-teal hover:bg-brand-tealHover text-white font-bold py-2 rounded-xl text-xs transition-colors shadow-sm">
+                                            ✓ اعتماد الحساب
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Toggle Reject Form Button -->
+                                    <button onclick="toggleRejectBox('user-reject-{{ p_user.id }}')" class="flex-grow bg-brand-orange hover:bg-brand-orangeHover text-white font-bold py-2 rounded-xl text-xs transition-colors shadow-sm">
+                                        ✗ رفض الحساب
+                                    </button>
+                                </div>
+
+                                <!-- Hidden Rejection Drawer -->
+                                <div id="user-reject-{{ p_user.id }}" class="hidden pt-3 border-t border-brand-dayBorder dark:border-brand-nightBorder">
+                                    <form method="POST" action="{% url 'admin_approvals_action' %}" class="space-y-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action_type" value="reject">
+                                        <input type="hidden" name="target_type" value="user">
+                                        <input type="hidden" name="target_id" value="{{ p_user.id }}">
+                                        
+                                        <label class="block text-[11px] font-bold text-brand-orange">سبب وملاحظات الرفض (إجبارية تظهر للمستخدم):</label>
+                                        <textarea name="rejection_notes" required rows="2" placeholder="مثال: الصورة الشخصية غير مطابقة أو الاسم غير رباعي..."
+                                                  class="w-full text-xs p-2 border border-brand-dayBorder dark:border-brand-nightBorder rounded-lg bg-brand-dayBg dark:bg-brand-nightBg focus:outline-none focus:ring-1 focus:ring-brand-orange text-brand-dayText dark:text-brand-nightText"></textarea>
+                                        
+                                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-xs transition-colors shadow-sm">
+                                            تأكيد الرفض والتعليق
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-white dark:bg-brand-nightSurface border border-brand-dayBorder dark:border-brand-nightBorder rounded-2xl p-8 text-center text-brand-dayTextSecondary dark:text-brand-nightTextSecondary text-sm">
+                    ✨ لا توجد حسابات معلقة حالياً.
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- LEFT PANEL: Pending Property Listings (2 Columns) -->
+        <div class="xl:col-span-2 space-y-6">
+            <div class="flex items-center justify-between border-b border-brand-dayBorder dark:border-brand-nightBorder pb-3">
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                    <span>🏠 إعلانات عقارية معلقة</span>
+                    <span class="bg-brand-teal/10 text-brand-teal text-xs px-2.5 py-1 rounded-full font-bold">
+                        {{ pending_properties|length }} طلبات
+                    </span>
+                </h2>
+            </div>
+
+            {% if pending_properties %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for property in pending_properties %}
+                        <div class="bg-white dark:bg-brand-nightSurface border border-brand-dayBorder dark:border-brand-nightBorder rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between">
+                            <!-- Image / Video -->
+                            <div class="relative h-44 bg-slate-100 overflow-hidden border-b border-brand-dayBorder dark:border-brand-nightBorder">
+                                {% if property.image %}
+                                    <img src="{{ property.image.url }}" alt="{{ property.title }}" class="w-full h-full object-cover">
+                                {% endif %}
+                                <div class="absolute top-2 right-2 bg-brand-orange text-white px-2 py-1 rounded-lg text-xs font-bold shadow-md">
+                                    {{ property.price|filesizeformat|slice:":-2" }} ج.م
+                                </div>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="p-4 space-y-3 flex-grow flex flex-col justify-between">
+                                <div class="space-y-2">
+                                    <h3 class="font-bold text-sm leading-snug line-clamp-1 text-brand-orange">{{ property.title }}</h3>
+                                    <p class="text-[10px] text-brand-dayTextSecondary dark:text-brand-nightTextSecondary flex items-center gap-1">📍 {{ property.address }}</p>
+                                    <p class="text-xs text-brand-dayTextSecondary dark:text-brand-nightTextSecondary line-clamp-3 leading-relaxed">
+                                        {{ property.description }}
+                                    </p>
+                                </div>
+
+                                <div class="bg-brand-dayBg dark:bg-brand-nightBg p-3 rounded-xl text-xs space-y-1.5 border border-brand-dayBorder dark:border-brand-nightBorder">
+                                    <p class="text-[11px] text-brand-dayTextSecondary dark:text-brand-nightTextSecondary">
+                                        صاحب العقار: <strong class="text-brand-dayText dark:text-brand-nightText">{{ property.owner.full_name }}</strong> (الهاتف: {{ property.owner.phone_numbers }})
+                                    </p>
+                                    {% if property.video %}
+                                        <div class="mt-2 pt-2 border-t border-brand-dayBorder dark:border-brand-nightBorder">
+                                            <a href="{{ property.video.url }}" target="_blank" class="text-brand-teal hover:underline font-bold inline-flex items-center gap-1">
+                                                📹 فتح ومعاينة الفيديو المرفق
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                {% if property.rejection_notes %}
+                                    <div class="bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 text-[10px] p-2.5 rounded-xl border border-red-200 dark:border-red-900 leading-relaxed">
+                                        <strong>ملاحظات الرفض السابقة:</strong> {{ property.rejection_notes }}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Action Forms -->
+                                <div class="pt-3 border-t border-brand-dayBorder dark:border-brand-nightBorder space-y-2">
+                                    <div class="flex gap-2">
+                                        <!-- Approve Property -->
+                                        <form method="POST" action="{% url 'admin_approvals_action' %}" class="flex-grow">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action_type" value="approve">
+                                            <input type="hidden" name="target_type" value="property">
+                                            <input type="hidden" name="target_id" value="{{ property.id }}">
+                                            <button type="submit" class="w-full bg-brand-teal hover:bg-brand-tealHover text-white font-bold py-2 rounded-xl text-xs transition-colors shadow-sm">
+                                                ✓ نشر العقار
+                                            </button>
+                                        </form>
+                                        
+                                        <!-- Toggle Reject Property -->
+                                        <button onclick="toggleRejectBox('property-reject-{{ property.id }}')" class="flex-grow bg-brand-orange hover:bg-brand-orangeHover text-white font-bold py-2 rounded-xl text-xs transition-colors shadow-sm">
+                                            ✗ رفض النشر
+                                        </button>
+                                    </div>
+
+                                    <!-- Hidden Rejection Drawer -->
+                                    <div id="property-reject-{{ property.id }}" class="hidden pt-2">
+                                        <form method="POST" action="{% url 'admin_approvals_action' %}" class="space-y-2">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action_type" value="reject">
+                                            <input type="hidden" name="target_type" value="property">
+                                            <input type="hidden" name="target_id" value="{{ property.id }}">
+                                            
+                                            <label class="block text-[10px] font-bold text-brand-orange">سبب الرفض والملاحظات (تظهر للمالك):</label>
+                                            <textarea name="rejection_notes" required rows="2" placeholder="مثال: يرجى إضافة تفاصيل تشطيب واضحة أو خفض السعر..."
+                                                      class="w-full text-xs p-2 border border-brand-dayBorder dark:border-brand-nightBorder rounded-lg bg-brand-dayBg dark:bg-brand-nightBg focus:outline-none focus:ring-1 focus:ring-brand-orange text-brand-dayText dark:text-brand-nightText"></textarea>
+                                            
+                                            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-xs transition-colors shadow-sm">
+                                                تأكيد الرفض والتعليق
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-white dark:bg-brand-nightSurface border border-brand-dayBorder dark:border-brand-nightBorder rounded-2xl p-12 text-center text-brand-dayTextSecondary dark:text-brand-nightTextSecondary text-sm">
+                    ✨ لا توجد إعلانات عقارية بانتظار المراجعة.
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Toggle helper script -->
+<script>
+    function toggleRejectBox(id) {
+        const box = document.getElementById(id);
+        if (box) {
+            box.classList.toggle('hidden');
+        }
+    }
+</script>
+{% endblock %}

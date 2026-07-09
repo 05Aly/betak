@@ -16,3 +16,6 @@ pillow>=10.2.0
 
 # 🚀 Production Server (For Deployment)
 gunicorn>=21.2.0
+
+# 🎨 Custom Modern Admin Theme (Django Unfold)
+django-unfold>=0.30.0

@@ -1,0 +1,292 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ property.title }} - الهضبة العقارية{% endblock %}
+
+{% block content %}
+
+<!-- Owner Rejection Notification Alert -->
+{% if property.rejection_notes and property.owner == request.user %}
+<div class="bg-red-50 dark:bg-red-950/20 text-red-800 dark:text-red-300 p-5 rounded-3xl border border-red-200 dark:border-red-900/50 mb-6 shadow-sm flex flex-col gap-1.5 animate-pulse">
+    <div class="flex items-center gap-2">
+        <span class="text-xl">⚠️</span>
+        <span class="font-bold text-base">تم رفض نشر هذا العقار من قبل الإدارة:</span>
+    </div>
+    <p class="font-bold text-brand-orange mt-1 pr-7">« {{ property.rejection_notes }} »</p>
+    <p class="text-xs text-brand-dayTextSecondary dark:text-brand-nightTextSecondary pr-7 mt-1">يرجى تعديل تفاصيل العقار أو التواصل مع الإدارة لإعادة المراجعة والاعتماد.</p>
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Property Details (Main Info) -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Main Media Card -->
+        <div class="bg-white dark:bg-brand-nightSurface rounded-2xl overflow-hidden shadow-sm border border-brand-dayBorder dark:border-brand-nightBorder p-4">
+            <div class="relative rounded-xl overflow-hidden bg-brand-dayBg dark:bg-brand-nightBg">
+                {% if property.image %}
+                    <img src="{{ property.image.url }}" alt="{{ property.title }}" class="w-full max-h-[450px] object-cover mx-auto">
+                {% endif %}
+            </div>
+            
+            <div class="mt-6 space-y-3">
+                <h1 class="text-2xl md:text-3xl font-extrabold text-brand-orange">{{ property.title }}</h1>
+                <p class="text-sm text-brand-dayTextSecondary dark:text-brand-nightTextSecondary flex items-center gap-1">📍 {{ property.address }}</p>
+                <div class="text-2xl font-black text-brand-teal">
+                    {{ property.price|filesizeformat|slice:":-2" }} ج.م
+                </div>
+            </div>
+        </div>
+
+        <!-- Description Card -->
+        <div class="bg-white dark:bg-brand-nightSurface rounded-2xl shadow-sm border border-brand-dayBorder dark:border-brand-nightBorder p-6 space-y-4">
+            <h2 class="text-lg font-bold border-b border-brand-dayBorder dark:border-brand-nightBorder pb-3 text-brand-orange">الوصف التفصيلي للعقار</h2>
+            <p class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary leading-relaxed whitespace-pre-line text-sm md:text-base">
+                {{ property.description }}
+            </p>
+        </div>
+
+        <!-- Property Video (if exists) -->
+        {% if property.video %}
+        <div class="bg-white dark:bg-brand-nightSurface rounded-2xl shadow-sm border border-brand-dayBorder dark:border-brand-nightBorder p-6 space-y-4">
+            <h2 class="text-lg font-bold border-b border-brand-dayBorder dark:border-brand-nightBorder pb-3 flex items-center gap-2 text-brand-orange">
+                <span>📹 معاينة الفيديو المصورة</span>
+            </h2>
+            <div class="aspect-video rounded-xl overflow-hidden bg-black border border-brand-dayBorder dark:border-brand-nightBorder">
+                <video src="{{ property.video.url }}" controls class="w-full h-full"></video>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar (Owner details & Action buttons) -->
+    <div class="space-y-6">
+        <!-- Owner Card -->
+        <div class="bg-white dark:bg-brand-nightSurface rounded-2xl shadow-sm border border-brand-dayBorder dark:border-brand-nightBorder p-6 text-center space-y-4 sticky top-24">
+            <h3 class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary text-xs font-semibold uppercase tracking-wider">مُعلن العقار (المالك المباشر)</h3>
+            
+            <div class="flex flex-col items-center space-y-3">
+                {% if property.owner.profile_picture %}
+                    <img src="{{ property.owner.profile_picture.url }}" alt="{{ property.owner.full_name }}" class="w-20 h-20 rounded-full object-cover border-4 border-brand-orange">
+                {% endif %}
+                <div>
+                    <h4 class="text-lg font-bold">{{ property.owner.full_name }}</h4>
+                    <span class="inline-block bg-brand-teal/10 text-brand-teal border border-brand-teal/20 text-xs font-bold px-3 py-1 rounded-full mt-1">
+                        ✓ مالك معتمد من الإدارة
+                    </span>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-brand-dayBorder dark:border-brand-nightBorder space-y-3">
+                <div class="bg-brand-dayBg dark:bg-brand-nightBg rounded-xl p-3 text-sm flex items-center justify-between border border-brand-dayBorder dark:border-brand-nightBorder">
+                    <span class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary">رقم الهاتف</span>
+                    <a href="tel:{{ property.owner.phone_numbers }}" class="font-bold hover:text-brand-orange transition-colors">
+                        {{ property.owner.phone_numbers }}
+                    </a>
+                </div>
+                <div class="bg-brand-dayBg dark:bg-brand-nightBg rounded-xl p-3 text-sm flex items-center justify-between border border-brand-dayBorder dark:border-brand-nightBorder">
+                    <span class="text-brand-dayTextSecondary dark:text-brand-nightTextSecondary">تاريخ النشر</span>
+                    <span class="font-semibold text-brand-dayText dark:text-brand-nightText">{{ property.created_at|date:"d M Y" }}</span>
+                </div>
+            </div>
+
+            <!-- Chat trigger button -->
+            <button id="open-chat-btn" 
+                    class="w-full bg-brand-teal hover:bg-brand-tealHover text-white font-bold py-3 rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                </svg>
+                <span>شات فوري مباشر مع المالك</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- POP-UP CHAT DRAWER SYSTEM -->
+<!-- ============================================== -->
+<div id="chat-drawer" class="fixed bottom-0 left-6 z-50 w-[360px] h-[480px] bg-white dark:bg-brand-nightSurface rounded-t-2xl shadow-2xl border border-brand-dayBorder dark:border-brand-nightBorder transform translate-y-full transition-transform duration-300 ease-out flex flex-col">
+    <!-- Chat Header -->
+    <div class="bg-brand-orange text-white px-4 py-3 rounded-t-2xl flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            {% if property.owner.profile_picture %}
+                <img src="{{ property.owner.profile_picture.url }}" alt="{{ property.owner.full_name }}" class="w-8 h-8 rounded-full object-cover border border-white/20">
+            {% endif %}
+            <div class="text-right">
+                <h4 class="text-[10px] text-orange-200">محادثة عقارية</h4>
+                <p class="text-sm font-bold truncate max-w-[180px]">{{ property.owner.full_name }}</p>
+            </div>
+        </div>
+        <button id="close-chat-btn" class="text-orange-100 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Chat Messages list -->
+    <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 bg-brand-dayBg dark:bg-brand-nightBg flex flex-col text-xs md:text-sm">
+        <!-- Welcoming Alert -->
+        <div class="bg-orange-50 dark:bg-orange-950/20 border border-brand-orange/20 p-3 rounded-lg text-brand-orange text-xs leading-relaxed">
+            📢 <strong>شات الهضبة المباشر:</strong> تواصل فورياً مع البائع بخصوص إعلان <strong>"{{ property.title }}"</strong>.
+        </div>
+    </div>
+
+    <!-- Chat Input Form -->
+    <form id="chat-form" class="p-3 border-t border-brand-dayBorder dark:border-brand-nightBorder flex gap-2 items-center bg-white dark:bg-brand-nightSurface">
+        <input type="text" id="chat-input" placeholder="اكتب رسالتك للمالك هنا..." required autocomplete="off"
+               class="flex-grow px-3 py-2 border border-brand-dayBorder dark:border-brand-nightBorder rounded-lg text-sm bg-brand-dayBg dark:bg-brand-nightBg text-brand-dayText dark:text-brand-nightText focus:outline-none focus:ring-1 focus:ring-brand-teal">
+        <button type="submit" class="bg-brand-teal hover:bg-brand-tealHover text-white p-2 rounded-lg transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 transform rotate-180">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+            </svg>
+        </button>
+    </form>
+</div>
+
+<!-- Supabase SDK Load -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+    const openChatBtn = document.getElementById('open-chat-btn');
+    const closeChatBtn = document.getElementById('close-chat-btn');
+    const chatDrawer = document.getElementById('chat-drawer');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    // Django variables passed to JS
+    const supabaseUrl = "{{ supabase_url }}";
+    const supabaseKey = "{{ supabase_anon_key }}";
+    const propertyId = "{{ property.id }}";
+    const userId = "{{ user.id }}";
+    const userFullName = "{{ user.full_name }}";
+    const ownerId = "{{ property.owner.id }}";
+    const ownerName = "{{ property.owner.full_name }}";
+    const ownerPhone = "{{ property.owner.phone_numbers }}";
+
+    // Unique channel session ID between this buyer and the property seller
+    const channelName = `property_chat_${propertyId}_${userId}`;
+    let supabaseClient = null;
+    let channel = null;
+
+    // Toggle chat pop-up
+    openChatBtn.addEventListener('click', () => {
+        chatDrawer.classList.remove('translate-y-full');
+        scrollToBottom();
+        initializeChat();
+    });
+
+    closeChatBtn.addEventListener('click', () => {
+        chatDrawer.classList.add('translate-y-full');
+    });
+
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendMessage(text, isMe, senderName) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `max-w-[80%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+            isMe 
+            ? 'bg-brand-teal text-white rounded-br-none self-end' 
+            : 'bg-white dark:bg-brand-nightSurface border border-brand-dayBorder dark:border-brand-nightBorder text-brand-dayText dark:text-brand-nightText rounded-bl-none self-start'
+        }`;
+        
+        const contentP = document.createElement('p');
+        contentP.textContent = text;
+        msgDiv.appendChild(contentP);
+        
+        const metaSpan = document.createElement('span');
+        metaSpan.className = `block text-[10px] mt-1 ${isMe ? 'text-teal-100 text-left' : 'text-gray-400 dark:text-gray-500 text-right'}`;
+        metaSpan.textContent = isMe ? 'أنا' : senderName;
+        msgDiv.appendChild(metaSpan);
+
+        chatMessages.appendChild(msgDiv);
+        scrollToBottom();
+    }
+
+    // Determine if we use Supabase Realtime or LocalStorage Mock Fallback
+    const isSupabaseReady = supabaseUrl && supabaseKey;
+
+    function initializeChat() {
+        // Load messages history from storage (local storage acts as history even for Supabase fallback testing)
+        chatMessages.querySelectorAll('.chat-msg').forEach(el => el.remove());
+        const history = JSON.parse(localStorage.getItem(channelName)) || [];
+        history.forEach(msg => {
+            appendMessage(msg.text, msg.senderId === userId, msg.senderName);
+        });
+
+        if (isSupabaseReady) {
+            if (!supabaseClient) {
+                // Initialize Supabase Client
+                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                
+                // Set up Realtime broadcast channel
+                channel = supabaseClient.channel(channelName);
+                
+                // Listen to message broadcasts
+                channel.on('broadcast', { event: 'message' }, ({ payload }) => {
+                    if (payload.senderId !== userId) {
+                        appendMessage(payload.text, false, payload.senderName);
+                        saveMessageLocal(payload.text, payload.senderId, payload.senderName);
+                    }
+                })
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('Successfully subscribed to Supabase Realtime channel!');
+                    }
+                });
+            }
+        } else {
+            console.log('Using local mock fallback chat system since Supabase variables are not set.');
+            // Add a friendly greeting if first time chatting
+            if (history.length === 0) {
+                setTimeout(() => {
+                    const welcomeText = `مرحباً بك! أنا ${ownerName}. يسعدني تواصلك بخصوص عقاري. يمكنك الاستفسار هنا أو الاتصال بي هاتفياً في أي وقت على ${ownerPhone}.`;
+                    appendMessage(welcomeText, false, ownerName);
+                    saveMessageLocal(welcomeText, ownerId, ownerName);
+                }, 1000);
+            }
+        }
+    }
+
+    function saveMessageLocal(text, senderId, senderName) {
+        const history = JSON.parse(localStorage.getItem(channelName)) || [];
+        history.push({ text, senderId, senderName, time: new Date() });
+        localStorage.setItem(channelName, JSON.stringify(history));
+    }
+
+    // Form submission
+    chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // Display locally
+        appendMessage(text, true, userFullName);
+        saveMessageLocal(text, userId, userFullName);
+        chatInput.value = '';
+
+        if (isSupabaseReady && channel) {
+            // Broadcast to channel
+            channel.send({
+                type: 'broadcast',
+                event: 'message',
+                payload: { text, senderId: userId, senderName: userFullName }
+            });
+        } else {
+            // Simulated seller reply
+            setTimeout(() => {
+                const autoReplies = [
+                    "أهلاً بك! لقد قرأت رسالتك وسأتصل بك هاتفياً قريباً لمناقشة التفاصيل والاتفاق.",
+                    "شكراً لاهتمامك. العقار متاح للمعاينة الفورية يوم الجمعة، يرجى التنسيق معي هاتفياً.",
+                    "وعليكم السلام، نعم السعر نهائي وقابل للتفاوض البسيط جداً في حال الجدية."
+                ];
+                const replyText = autoReplies[Math.floor(Math.random() * autoReplies.length)];
+                appendMessage(replyText, false, ownerName);
+                saveMessageLocal(replyText, ownerId, ownerName);
+            }, 1500);
+        }
+    });
+</script>
+{% endblock %}
